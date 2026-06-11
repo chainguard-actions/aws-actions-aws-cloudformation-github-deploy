@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Minimal test CloudFormation template for action input coverage tests
+Parameters:
+  Env:
+    Type: String
+    Default: test
+    Description: Environment name
+  Region:
+    Type: String
+    Default: us-east-1
+    Description: AWS Region
+Resources:
+  TestBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      Tags:
+        - Key: Environment
+          Value: !Ref Env
+Outputs:
+  BucketName:
+    Value: !Ref TestBucket
+    Description: The name of the test bucket
