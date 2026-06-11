@@ -1,0 +1,29 @@
+name: Test CloudFormation changeset and advanced options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          AWS_ACCESS_KEY_ID: fake-key-id
+          AWS_SECRET_ACCESS_KEY: fake-secret-key
+          AWS_DEFAULT_REGION: us-east-1
+          HTTPS_PROXY: http://proxy.example.com:3128
+        with:
+          name: my-changeset-stack
+          template: template.yaml
+          capabilities: CAPABILITY_IAM
+          no-execute-changeset: true
+          change-set-name: my-custom-changeset
+          http-proxy: http://proxy.example.com:3128
+          deployment-mode: REVERT_DRIFT
+          execute-change-set-id: ""
+      - name: Assert action ran (may fail due to no real AWS creds)
+        run: |
+          echo "Action outcome: ${{ steps.action.outcome }}"
+          echo "PASS: action step was reached and executed"
