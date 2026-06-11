@@ -1,0 +1,147 @@
+# Contributing Guidelines
+
+Thank you for your interest in contributing to our project. Whether it's a bug report, new feature, correction, or additional
+documentation, we greatly value feedback and contributions from our community.
+
+Please read through this document before submitting any issues or pull requests to ensure we have all the necessary
+information to effectively respond to your bug report or contribution.
+
+## Reporting Bugs/Feature Requests
+
+We welcome you to use the GitHub issue tracker to report bugs or suggest features.
+
+When filing an issue, please check [existing open](https://github.com/aws-actions/aws-cloudformation-github-deploy/issues), or [recently closed](https://github.com/aws-actions/aws-cloudformation-github-deploy/issues?utf8=%E2%9C%93&q=is%3Aissue%20is%3Aclosed%20), issues to make sure somebody else hasn't already
+reported the issue. Please try to include as much information as you can. Details like these are incredibly useful:
+
+- A reproducible test case or series of steps
+- The version of our code being used
+- Any modifications you've made relevant to the bug
+- Anything unusual about your environment or deployment
+
+## Contributing via Pull Requests
+
+Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
+
+1. You are working against the latest source on the _master_ branch.
+2. You check existing open, and recently merged, pull requests to make sure someone else hasn't addressed the problem already.
+3. You open an issue to discuss any significant work - we would hate for your time to be wasted.
+
+To send us a pull request, please:
+
+1. Fork the repository.
+2. Modify the source; please focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
+3. Ensure local tests pass.
+4. Commit to your fork using clear commit messages.
+5. Send us a pull request, answering any default questions in the pull request interface.
+6. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
+
+GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
+[creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
+
+## Finding contributions to work on
+
+Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/duplicate/help wanted/invalid/question/wontfix), looking at any ['help wanted'](https://github.com/aws-actions/aws-cloudformation-github-deploy/labels/help%20wanted) issues is a great place to start.
+
+## Code of Conduct
+
+This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct).
+For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq) or contact
+opensource-codeofconduct@amazon.com with any additional questions or comments.
+
+## Security issue notifications
+
+If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
+
+## Licensing
+
+See the [LICENSE](https://github.com/aws-actions/aws-cloudformation-github-deploy/blob/master/LICENSE) file for our project's licensing. We will ask you to confirm the licensing of your contribution.
+
+We may ask you to sign a [Contributor License Agreement (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) for larger changes.
+
+## Development
+
+### Prerequisites
+
+- Node.js 20+
+- npm
+
+### Setup
+
+```bash
+npm install
+```
+
+### Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run linting
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+```
+
+### Building
+
+```bash
+# Build the action
+npm run build
+
+# Package for distribution
+npm run package
+```
+
+### AWS CloudFormation API Calls
+
+This action makes the following AWS CloudFormation API calls:
+
+**Core Operations:**
+
+- `DescribeStacks` - Check stack existence and status
+- `CreateChangeSet` - Create change sets for stack operations
+- `DescribeChangeSet` - Monitor change set status and retrieve changes
+- `ExecuteChangeSet` - Execute change sets (when not in create-only mode)
+- `DeleteChangeSet` - Clean up failed change sets
+
+**Event Streaming and Error Reporting:**
+
+- `DescribeEvents` - Monitor real-time CloudFormation events and retrieve detailed error information
+
+**Required Permissions:**
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:DescribeStacks",
+        "cloudformation:CreateChangeSet",
+        "cloudformation:DescribeChangeSet",
+        "cloudformation:DeleteChangeSet",
+        "cloudformation:ExecuteChangeSet",
+        "cloudformation:DescribeEvents"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
+### Architecture
+
+The action uses a change set-based deployment approach:
+
+1. **Stack Detection**: Check if stack exists using `DescribeStacks`
+2. **Change Set Creation**: Create change set using `CreateChangeSet`
+3. **Change Set Validation**: Monitor status with `DescribeChangeSet`
+4. **Execution**: Execute change set with `ExecuteChangeSet` (unless create-only mode)
+5. **Output Processing**: Retrieve final stack state and outputs
+6. **Error Handling**: Use `DescribeEvents` for detailed error reporting and event streaming

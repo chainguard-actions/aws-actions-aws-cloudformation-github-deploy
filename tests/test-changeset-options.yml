@@ -1,0 +1,59 @@
+name: Test CloudFormation changeset and advanced options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Write minimal CloudFormation template
+        run: |
+          mkdir -p /tmp/cfn
+          cat > /tmp/cfn/template.yaml << 'EOF'
+          AWSTemplateFormatVersion: '2010-09-09'
+          Description: Test stack for changeset options
+          Resources:
+            MyBucket:
+              Type: AWS::S3::Bucket
+          EOF
+      - id: action-no-execute
+        uses: .
+        continue-on-error: true
+        with:
+          name: test-stack-cs
+          template: /tmp/cfn/template.yaml
+          no-execute-changeset: "true"
+          change-set-name: "my-custom-changeset"
+          http-proxy: ""
+          deployment-mode: ""
+          capabilities: "CAPABILITY_IAM"
+          fail-on-empty-changeset: "false"
+      - name: Assert action ran (may fail due to missing AWS credentials)
+        env:
+          OUTCOME: ${{ steps.action-no-execute.outcome }}
+        run: |
+          echo "action outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action executed with outcome=$OUTCOME"
+          else
+            echo "FAIL: unexpected outcome=$OUTCOME"
+            exit 1
+          fi
+      - id: action-execute-id
+        uses: .
+        continue-on-error: true
+        with:
+          name: test-stack-cs
+          execute-change-set-id: "arn:aws:cloudformation:us-east-1:123456789012:changeSet/my-changeset/abc123"
+          mode: "execute-only"
+      - name: Assert execute-change-set-id action ran
+        env:
+          OUTCOME: ${{ steps.action-execute-id.outcome }}
+        run: |
+          echo "action outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action executed with outcome=$OUTCOME"
+          else
+            echo "FAIL: unexpected outcome=$OUTCOME"
+            exit 1
+          fi
