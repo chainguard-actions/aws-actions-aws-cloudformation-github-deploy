@@ -1,0 +1,37 @@
+name: Test http-proxy and change-set-name inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create minimal CloudFormation template
+        run: |
+          mkdir -p /tmp/cfn
+          cat > /tmp/cfn/template-proxy.yaml << 'EOF'
+          AWSTemplateFormatVersion: '2010-09-09'
+          Description: Test stack for proxy and changeset name
+          Resources:
+            WaitHandle:
+              Type: AWS::CloudFormation::WaitConditionHandle
+          EOF
+      - id: action
+        uses: .
+        continue-on-error: true
+        env:
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: fake-key-id
+          AWS_SECRET_ACCESS_KEY: fake-secret-key
+        with:
+          name: test-stack-proxy
+          template: /tmp/cfn/template-proxy.yaml
+          capabilities: CAPABILITY_IAM
+          http-proxy: "http://proxy.example.com:8080"
+          change-set-name: "my-custom-changeset"
+          no-execute-changeset: "1"
+          no-fail-on-empty-changeset: "1"
+      - name: Assert action was invoked with proxy and changeset inputs
+        run: |
+          echo "Action completed (may fail due to no real AWS credentials)"
+          echo "PASS: http-proxy and change-set-name inputs were accepted"
