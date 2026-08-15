@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Minimal test CloudFormation template for action testing
+
+Parameters:
+  Env:
+    Type: String
+    Default: dev
+    Description: Environment name
+  Version:
+    Type: String
+    Default: "1.0.0"
+    Description: Application version
+
+Resources:
+  TestBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      Tags:
+        - Key: Environment
+          Value: !Ref Env
+        - Key: Version
+          Value: !Ref Version
+
+Outputs:
+  BucketName:
+    Description: Name of the S3 bucket
+    Value: !Ref TestBucket

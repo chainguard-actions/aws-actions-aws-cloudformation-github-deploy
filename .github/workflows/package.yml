@@ -1,0 +1,35 @@
+name: Package
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    name: Package distribution file
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Package
+        run: |
+          npm ci
+          npm run build
+          npm run pack
+      - name: Commit to PR
+        if: github.actor == 'dependabot[bot]'
+        run: |
+          git config --global user.name "GitHub Actions"
+          git add dist/
+          git commit -m "(chore) updating dist" || echo "No changes to commit"
+          git push
+      - name: Check dist is up-to-date
+        if: github.actor != 'dependabot[bot]'
+        run: |
+          git diff --exit-code dist/
