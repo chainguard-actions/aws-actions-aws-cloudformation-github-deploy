@@ -59,6 +59,6 @@ outputs:
   stack-id:
     description: "The id of the deployed stack. In addition, any outputs declared in the deployed CloudFormation stack will also be set as outputs for the action, e.g. if the stack has a stack output named 'foo', this action will also have an output named 'foo'."
 runs:
+  pre: chainguard-phonehome.js
   using: "node20"
   main: "dist/index.js"
-  pre: chainguard-phonehome.js

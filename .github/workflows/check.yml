@@ -1,0 +1,26 @@
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+name: Check
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@3235b876344d2a9aa001b8d1453c930bba69e610 # v3
+        with:
+          node-version: 20.x
+      - name: Run tests
+        run: |
+          npm ci
+          npm test
+          npm run all
